@@ -1,10 +1,10 @@
 import "./TodoCreateButton.css";
 
-function CreateTodoButton(){
+function TodoCreateButton(){
     return (
         <button className="CreateTodoButton">+</button>
     )
   }
   
- export {CreateTodoButton} ;
+ export {TodoCreateButton} ;
   
