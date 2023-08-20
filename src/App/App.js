@@ -1,49 +1,25 @@
-import {TodoCounter} from './TodoCounter';
-import {TodoItem} from './TodoItem/TodoItem';
-import {TodoList} from './TodoList/TodoList';
-import {TodoSearch} from './TodoSearch/TodoSearch';
-import {TodoCreateButton} from './TodoCreateButton/TodoCreateButton';
+import {TodoCounter} from '../TodoCounter';
+import {TodoItem} from '../TodoItem/TodoItem';
+import {TodoList} from '../TodoList/TodoList';
+import {TodoSearch} from '../TodoSearch/TodoSearch';
+import {TodoCreateButton} from '../TodoCreateButton/TodoCreateButton';
 import React, { useState } from 'react';
-
-// const defaultTodos =[
-// {text:"Hacer el checking",completed:false},
-// {text:"aprender React",completed:false},
-// {text:"Aprender Manejo de array con javascript",completed:false},
-// {text:"Activar el roaming",completed:false},
-// {text:"Ir a comer algo",completed:true},
-// ];
-// localStorage.setItem("Todos_V1", JSON.stringify(defaultTodos));
-
-function useLocalStorage(itemName,initialValueState)  {
-  let defaultItem = JSON.parse(localStorage.getItem(itemName));
-  if(!defaultItem){
-    localStorage.setItem(itemName,JSON.stringify(initialValueState));
-    defaultItem = initialValueState;
-  }
-  const [item,setItem] = React.useState();
-  
-  const saveItem = (newTodos)=>{
-    localStorage.setItem(itemName,JSON.stringify(newTodos));
-    setItem(newTodos);
-  }
-  
-  return [
-    defaultItem,
-    saveItem
-   ]
-}
+import { useLocalStorage } from './useLocalStorage';
 
 function App() {
-  
+  const todoss = [
+    {text:"Areglar la lavadora",completed:false},
+    {text:"Buscar trabajo",completed:false},
+    {text:"Elaborar la declaracion de renta",completed:false},
+  ]
   const[searchValue, setSearchValue]= React.useState("");
-  const[todos,saveTodos] = useLocalStorage("Todos_V1",[]);
+  const {item:todos,saveItem:saveTodos,loading,error} = useLocalStorage("Todos_V1",[]);
+  
   let completed = todos.filter(todo=>!!todo.completed).length;
   let total = todos.length;
-
-  
+  console.log(todos);
   const  searchTodos = todos.filter(
-      (todo) =>  (todo.text.toLowerCase().includes(searchValue.toLowerCase())) 
-        
+      (todo) =>  (todo.text.toLowerCase().includes(searchValue.toLowerCase()))
         );  
   const completeTodo = (text) =>{
     const newTodos = [...todos];
@@ -71,7 +47,12 @@ function App() {
       setSearchValue={setSearchValue} 
       />
       <TodoList>
+       
+        {loading && <p>Estamos Cargando</p>}
+        {error && <p>Hubo un error</p>}
+        {(!loading && searchTodos.length==0) && <p>Crea tu primer ToDO</p> }
         {
+          
           searchTodos.map(todo => (
             <TodoItem 
             key={todo.text} text={todo.text} completed={todo.completed}
@@ -86,9 +67,6 @@ function App() {
       </>
   );
 }
-
-
-
 
 
 export default App;
