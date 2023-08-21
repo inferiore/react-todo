@@ -4,67 +4,60 @@ import {TodoList} from '../TodoList/TodoList';
 import {TodoSearch} from '../TodoSearch/TodoSearch';
 import {TodoCreateButton} from '../TodoCreateButton/TodoCreateButton';
 import React, { useState } from 'react';
-import { useLocalStorage } from './useLocalStorage';
-
+import {TodoContext,TodoProvider} from '../TodoContext/TodoContext'
+import { Modal } from '../Modal/Modal';
+import { TodoCreateForm } from '../TodoCreateForm/TodoCreateForm';
 function App() {
-  const todoss = [
-    {text:"Areglar la lavadora",completed:false},
-    {text:"Buscar trabajo",completed:false},
-    {text:"Elaborar la declaracion de renta",completed:false},
-  ]
-  const[searchValue, setSearchValue]= React.useState("");
-  const {item:todos,saveItem:saveTodos,loading,error} = useLocalStorage("Todos_V1",[]);
-  
-  let completed = todos.filter(todo=>!!todo.completed).length;
-  let total = todos.length;
-  console.log(todos);
-  const  searchTodos = todos.filter(
-      (todo) =>  (todo.text.toLowerCase().includes(searchValue.toLowerCase()))
-        );  
-  const completeTodo = (text) =>{
-    const newTodos = [...todos];
-    const todoIndex = newTodos.findIndex(
-      (todo) => todo.text === text
-    ) 
-    newTodos[todoIndex].completed = true;
-    saveTodos(newTodos);
-  }
-  const deleteTodo = (text) =>{
-    let  newTodos = [...todos];
-    const todoIndex = newTodos.findIndex(
-      (todo) => todo.text === text
-    ) 
-    newTodos.splice(todoIndex,1);
-    saveTodos(newTodos);
-  }
+ 
   
   return (
-    <>
-      <TodoCounter 
-      total={total}  
-      completed={completed}/>
-      <TodoSearch
-      setSearchValue={setSearchValue} 
-      />
-      <TodoList>
-       
-        {loading && <p>Estamos Cargando</p>}
-        {error && <p>Hubo un error</p>}
-        {(!loading && searchTodos.length==0) && <p>Crea tu primer ToDO</p> }
-        {
-          
-          searchTodos.map(todo => (
-            <TodoItem 
-            key={todo.text} text={todo.text} completed={todo.completed}
-            onComplete={() => completeTodo(todo.text)}
-            onDelete={() => deleteTodo(todo.text)}
-            
-            />
-          ))
-        }
-      </TodoList>
-      <TodoCreateButton/>
-      </>
+    <TodoProvider>
+      <TodoContext.Consumer>
+        {(
+          { total,
+            completed,
+            setSearchValue,
+            loading,error,
+            searchTodos,
+            completeTodo,
+            deleteTodo,
+            openModal,
+            setOpenModal
+          })=>(
+            <>
+              <TodoCounter 
+                total={total}  
+                completed={completed}/>
+                <TodoSearch
+                setSearchValue={setSearchValue} 
+                />
+                <TodoList>
+                
+                  {loading && <p>Estamos Cargando</p>}
+                  {error && <p>Hubo un error</p>}
+                  {(!loading && searchTodos.length==0) && <p>Crea tu primer ToDO</p> }
+                  {
+                    
+                    searchTodos.map(todo => (
+                      <TodoItem 
+                      key={todo.text} text={todo.text} completed={todo.completed}
+                      onComplete={() => completeTodo(todo.text)}
+                      onDelete={() => deleteTodo(todo.text)}
+                      
+                      />
+                    ))
+                  }
+                </TodoList>
+                <TodoCreateButton setOpenModal={setOpenModal}/>
+               {openModal && (
+                <Modal>
+                  <TodoCreateForm></TodoCreateForm>
+                </Modal>
+               )}
+            </>
+        )}
+      </TodoContext.Consumer>
+      </TodoProvider>
   );
 }
 
